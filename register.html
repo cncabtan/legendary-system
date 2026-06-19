@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbosa Server - تسجيل الدخول</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-card {
+            background-color: #161b22;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            width: 360px;
+            text-align: center;
+            border: 1px solid #30363d;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #58a6ff;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #58a6ff;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 5px;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        .input-group input:focus {
+            border-color: #58a6ff;
+            outline: none;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background-color: #1f6feb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background-color: #388bfd;
+        }
+
+        .register-link {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .register-link a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo">BARBOSA SERVER</div>
+        <div class="subtitle">قم بتسجيل الدخول باستخدام بياناتك</div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="username">اسم المستخدم (USERNAME)</label>
+                <input type="text" id="username" placeholder="أدخل اسم المستخدم...">
+            </div>
+
+            <div class="input-group">
+                <label for="password">كلمة المرور (PASSWORD)</label>
+                <input type="password" id="password" placeholder="أدخل كلمة المرور...">
+            </div>
+
+            <button type="button" class="btn-login">تسجيل الدخول (SIGN IN)</button>
+        </form>
+
+        <div class="register-link">
+            ليس لديك حساب؟ <a href="#" id="toRegister">إنشاء حساب جديد من هنا</a>
+        </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBzKvXUcZz0039bFOta9a27gG8P9oP2_0A",
+        authDomain: "barbosa-server.firebaseapp.com",
+        projectId: "barbosa-server",
+        storageBucket: "barbosa-server.appspot.com",
+        messagingSenderId: "369957518951",
+        appId: "1:369957518951:web:f15dc861efec75210e39bf",
+        measurementId: "G-Y67YMV9V28"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // دالة التوجيه الآمن
+      function navigateTo(targetFile) {
+          let currentPath = window.location.pathname;
+          let newPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/' + targetFile;
+          window.location.href = window.location.origin ? window.location.origin + newPath : targetFile;
+      }
+
+      // ربط رابط الانتقال لصفحة التسجيل
+      document.getElementById('toRegister').addEventListener('click', (e) => {
+          e.preventDefault();
+          navigateTo("register.html");
+      });
+
+      document.querySelector('.btn-login').addEventListener('click', async () => {
+          const usernameInput = document.getElementById('username').value.trim();
+          const passwordInput = document.getElementById('password').value;
+
+          if(!usernameInput || !passwordInput) {
+              alert('الرجاء كتابة اسم المستخدم وكلمة المرور!');
+              return;
+          }
+
+          try {
+              const userRef = doc(db, "users", usernameInput);
+              const userSnap = await getDoc(userRef);
+
+              if (!userSnap.exists()) {
+                  alert('اسم المستخدم هذا غير مسجل لدينا!');
+                  return;
+              }
+
+              const userData = userSnap.data();
+
+              if (userData.password !== passwordInput) {
+                  alert('كلمة المرور غير صحيحة!');
+                  return;
+              }
+
+              localStorage.setItem('currentUser', usernameInput);
+              alert(`مرحباً بك مجدداً يا ${usernameInput}! تم تسجيل الدخول بنجاح.`);
+              
+              // الانتقال إلى لوحة التحكم
+              navigateTo("index.html");
+
+          } catch (error) {
+              console.error("Login Error:", error);
+              alert('حدث خطأ أثناء الاتصال بالسيرفر.');
+          }
+      });
+    </script>
+</body>
+</html>
