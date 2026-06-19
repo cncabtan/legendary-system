@@ -3,193 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbosa Server - تسجيل الدخول</title>
+    <title>تسجيل الدخول - النظام الأسطوري</title>
+    
     <style>
+        /* تأثير الظهور السلس والتصميم الأساسي */
         body {
-            background-color: #0d1117;
-            color: #ffffff;
+            background-color: #1a1a1a;
+            color: white;
             font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            animation: fadeIn 1.5s ease-in-out;
         }
 
-        .login-card {
-            background-color: #161b22;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            width: 360px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* تصميم صندوق تسجيل الدخول */
+        .login-box {
+            background-color: #2b2b2b;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.8);
             text-align: center;
-            border: 1px solid #30363d;
+            width: 300px;
+            border: 2px solid #ffcc00;
         }
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #58a6ff;
-            margin-bottom: 5px;
+        .login-box h2 {
+            margin-bottom: 25px;
+            color: #ffcc00;
         }
 
-        .subtitle {
-            color: #8b949e;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: right;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-            color: #58a6ff;
-        }
-
-        .input-group input {
+        /* تصميم الحقول */
+        input[type="text"], input[type="password"] {
             width: 100%;
             padding: 12px;
-            background-color: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            background-color: #1a1a1a;
             color: white;
             box-sizing: border-box;
-        }
-
-        .input-group input:focus {
-            border-color: #58a6ff;
-            outline: none;
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 12px;
-            background-color: #1f6feb;
-            color: white;
-            border: none;
-            border-radius: 5px;
             font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ffcc00;
+        }
+
+        /* تصميم قسم كلمة المرور مع زر العين */
+        .pass-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            left: 10px;
+            top: 25px;
+            cursor: pointer;
+            font-size: 18px;
+            user-select: none;
+        }
+
+        /* تصميم زر الدخول */
+        .login-btn {
+            background-color: #ffcc00;
+            color: #000;
+            border: none;
+            padding: 12px;
+            margin-top: 25px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 16px;
+            width: 100%;
             transition: 0.3s;
         }
 
-        .btn-login:hover {
-            background-color: #388bfd;
-        }
-
-        .register-link {
-            margin-top: 20px;
-            font-size: 13px;
-            color: #8b949e;
-        }
-
-        .register-link a {
-            color: #58a6ff;
-            text-decoration: none;
-        }
-
-        .register-link a:hover {
-            text-decoration: underline;
+        .login-btn:hover {
+            background-color: #e6b800;
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <div class="logo">BARBOSA SERVER</div>
-        <div class="subtitle">قم بتسجيل الدخول باستخدام بياناتك</div>
-
-        <form id="loginForm">
-            <div class="input-group">
-                <label for="username">اسم المستخدم (USERNAME)</label>
-                <input type="text" id="username" placeholder="أدخل اسم المستخدم...">
-            </div>
-
-            <div class="input-group">
-                <label for="password">كلمة المرور (PASSWORD)</label>
-                <input type="password" id="password" placeholder="أدخل كلمة المرور...">
-            </div>
-
-            <button type="button" class="btn-login">تسجيل الدخول (SIGN IN)</button>
-        </form>
-
-        <div class="register-link">
-            ليس لديك حساب؟ <a href="#" id="toRegister">إنشاء حساب جديد من هنا</a>
+    <div class="login-box">
+        <h2>النظام الأسطوري</h2>
+        
+        <input type="text" id="username" placeholder="اسم المستخدم أو الـ ID">
+        
+        <div class="pass-container">
+            <input type="password" id="passInput" placeholder="كلمة المرور">
+            <span class="toggle-btn" onclick="togglePassword()">👁️</span>
         </div>
+
+        <button class="login-btn" onclick="checkFields()">دخول إلى اللعبة</button>
     </div>
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <script>
+        // دالة إظهار وإخفاء كلمة المرور
+        function togglePassword() {
+            var input = document.getElementById("passInput");
+            if (input.type === "password") {
+                input.type = "text";
+            } else {
+                input.type = "password";
+            }
+        }
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyBzKvXUcZz0039bFOta9a27gG8P9oP2_0A",
-        authDomain: "barbosa-server.firebaseapp.com",
-        projectId: "barbosa-server",
-        storageBucket: "barbosa-server.appspot.com",
-        messagingSenderId: "369957518951",
-        appId: "1:369957518951:web:f15dc861efec75210e39bf",
-        measurementId: "G-Y67YMV9V28"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-
-      // دالة التوجيه الآمن
-      function navigateTo(targetFile) {
-          let currentPath = window.location.pathname;
-          let newPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/' + targetFile;
-          window.location.href = window.location.origin ? window.location.origin + newPath : targetFile;
-      }
-
-      // ربط رابط الانتقال لصفحة التسجيل
-      document.getElementById('toRegister').addEventListener('click', (e) => {
-          e.preventDefault();
-          navigateTo("register.html");
-      });
-
-      document.querySelector('.btn-login').addEventListener('click', async () => {
-          const usernameInput = document.getElementById('username').value.trim();
-          const passwordInput = document.getElementById('password').value;
-
-          if(!usernameInput || !passwordInput) {
-              alert('الرجاء كتابة اسم المستخدم وكلمة المرور!');
-              return;
-          }
-
-          try {
-              const userRef = doc(db, "users", usernameInput);
-              const userSnap = await getDoc(userRef);
-
-              if (!userSnap.exists()) {
-                  alert('اسم المستخدم هذا غير مسجل لدينا!');
-                  return;
-              }
-
-              const userData = userSnap.data();
-
-              if (userData.password !== passwordInput) {
-                  alert('كلمة المرور غير صحيحة!');
-                  return;
-              }
-
-              localStorage.setItem('currentUser', usernameInput);
-              alert(`مرحباً بك مجدداً يا ${usernameInput}! تم تسجيل الدخول بنجاح.`);
-              
-              // الانتقال إلى لوحة التحكم
-              navigateTo("index.html");
-
-          } catch (error) {
-              console.error("Login Error:", error);
-              alert('حدث خطأ أثناء الاتصال بالسيرفر.');
-          }
-      });
+        // دالة التحقق من الحقول الفارغة
+        function checkFields() {
+            var user = document.getElementById("username").value;
+            var pass = document.getElementById("passInput").value;
+            
+            if(user === "" || pass === "") {
+                alert("⚠️ الرجاء تعبئة جميع الحقول أولاً!");
+            } else {
+                alert("✅ تم تسجيل الدخول بنجاح يا بطل! (جاري تحويلك...)");
+                // يمكنك لاحقاً إضافة كود هنا للانتقال لصفحة أخرى
+            }
+        }
     </script>
+
 </body>
 </html>
