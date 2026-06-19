@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbosa Server - تسجيل الدخول</title>
+    <title>Barbosa Server - إنشاء حساب</title>
     <style>
         body {
             background-color: #0d1117;
@@ -16,7 +17,7 @@
             margin: 0;
         }
 
-        .login-card {
+        .register-card {
             background-color: #161b22;
             padding: 30px;
             border-radius: 10px;
@@ -37,10 +38,13 @@
             color: #8b949e;
             font-size: 14px;
             margin-bottom: 20px;
+            border: 1px dashed #f0883e;
+            padding: 5px;
+            border-radius: 5px;
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: right;
         }
 
@@ -66,10 +70,10 @@
             outline: none;
         }
 
-        .btn-login {
+        .btn-register {
             width: 100%;
             padding: 12px;
-            background-color: #1f6feb;
+            background-color: #238636;
             color: white;
             border: none;
             border-radius: 5px;
@@ -79,54 +83,59 @@
             transition: 0.3s;
         }
 
-        .btn-login:hover {
-            background-color: #388bfd;
+        .btn-register:hover {
+            background-color: #2ea043;
         }
 
-        .register-link {
+        .login-link {
             margin-top: 20px;
             font-size: 13px;
             color: #8b949e;
         }
 
-        .register-link a {
+        .login-link a {
             color: #58a6ff;
             text-decoration: none;
         }
 
-        .register-link a:hover {
+        .login-link a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
+    <div class="register-card">
         <div class="logo">BARBOSA SERVER</div>
-        <div class="subtitle">قم بتسجيل الدخول باستخدام بياناتك</div>
+        <div class="subtitle">قم بإنشاء حسابك باستخدام مفتاح الوصول الخاص بك</div>
 
-        <form id="loginForm">
+        <form id="registerForm">
             <div class="input-group">
-                <label for="username">اسم المستخدم (USERNAME)</label>
-                <input type="text" id="username" placeholder="أدخل اسم المستخدم...">
+                <label for="username">اختر اسم مستخدم (USERNAME)</label>
+                <input type="text" id="username" placeholder="مثال: Mhmad">
             </div>
 
             <div class="input-group">
                 <label for="password">كلمة المرور (PASSWORD)</label>
-                <input type="password" id="password" placeholder="أدخل كلمة المرور...">
+                <input type="password" id="password" placeholder="أدخل كلمة مرور قوية...">
             </div>
 
-            <button type="button" class="btn-login">تسجيل الدخول (SIGN IN)</button>
+            <div class="input-group">
+                <label for="accessKey">مفتاح الوصول (ACCESS KEY)</label>
+                <input type="text" id="accessKey" placeholder="أدخل المفتاح الذي في قاعدة البيانات...">
+            </div>
+
+            <button type="button" class="btn-register" id="submitRegister">تسجيل الحساب (REGISTER)</button>
         </form>
 
-        <div class="register-link">
-            ليس لديك حساب؟ <a href="#" id="toRegister">إنشاء حساب جديد من هنا</a>
+        <div class="login-link">
+            لديك حساب بالفعل؟ <a href="#" id="toLogin">تسجيل الدخول من هنا</a>
         </div>
     </div>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+      import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyBzKvXUcZz0039bFOta9a27gG8P9oP2_0A",
@@ -141,53 +150,64 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
 
-      // دالة التوجيه الآمن
       function navigateTo(targetFile) {
           let currentPath = window.location.pathname;
           let newPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/' + targetFile;
           window.location.href = window.location.origin ? window.location.origin + newPath : targetFile;
       }
 
-      // ربط رابط الانتقال لصفحة التسجيل
-      document.getElementById('toRegister').addEventListener('click', (e) => {
+      document.getElementById('toLogin').addEventListener('click', (e) => {
           e.preventDefault();
-          navigateTo("register.html");
+          navigateTo("login.html");
       });
 
-      document.querySelector('.btn-login').addEventListener('click', async () => {
-          const usernameInput = document.getElementById('username').value.trim();
-          const passwordInput = document.getElementById('password').value;
+      document.getElementById('submitRegister').addEventListener('click', async () => {
+          const username = document.getElementById('username').value.trim();
+          const password = document.getElementById('password').value;
+          const accessKey = document.getElementById('accessKey').value.trim();
 
-          if(!usernameInput || !passwordInput) {
-              alert('الرجاء كتابة اسم المستخدم وكلمة المرور!');
+          if(!username || !password || !accessKey) {
+              alert('الرجاء ملء جميع الحقول المطلوبة!');
               return;
           }
 
           try {
-              const userRef = doc(db, "users", usernameInput);
+              const keyRef = doc(db, "keys", accessKey);
+              const keySnap = await getDoc(keyRef);
+
+              if(!keySnap.exists()) {
+                  alert('مفتاح الوصول هذا غير صحيح أو غير موجود في السيرفر!');
+                  return;
+              }
+
+              const keyData = keySnap.data();
+              if(keyData.used === true) {
+                  alert('عذراً، هذا المفتاح تم استخدامه مسبقاً لإنشاء حساب آخر!');
+                  return;
+              }
+
+              const userRef = doc(db, "users", username);
               const userSnap = await getDoc(userRef);
 
-              if (!userSnap.exists()) {
-                  alert('اسم المستخدم هذا غير مسجل لدينا!');
+              if(userSnap.exists()) {
+                  alert('اسم المستخدم هذا محجوز بالفعل! اختر اسماً آخر.');
                   return;
               }
 
-              const userData = userSnap.data();
+              await setDoc(userRef, {
+                  username: username,
+                  password: password,
+                  createdAt: new Date().toISOString()
+              });
 
-              if (userData.password !== passwordInput) {
-                  alert('كلمة المرور غير صحيحة!');
-                  return;
-              }
+              await setDoc(keyRef, { used: true }, { merge: true });
 
-              localStorage.setItem('currentUser', usernameInput);
-              alert(`مرحباً بك مجدداً يا ${usernameInput}! تم تسجيل الدخول بنجاح.`);
-              
-              // الانتقال إلى لوحة التحكم
-              navigateTo("index.html");
+              alert('تهانينا! تم إنشاء وتفعيل حسابك بنجاح.');
+              navigateTo("login.html");
 
           } catch (error) {
-              console.error("Login Error:", error);
-              alert('حدث خطأ أثناء الاتصال بالسيرفر.');
+              console.error("Registration Error:", error);
+              alert('حدث خطأ غير متوقع أثناء الاتصال بقاعدة البيانات.');
           }
       });
     </script>
